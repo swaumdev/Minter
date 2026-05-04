@@ -1,0 +1,92 @@
+WITH
+	o_min_max_time
+AS
+(
+	SELECT 	im.tradingsymbol , 
+			ot.instrument_token, 
+			min(ot.timestamp) mint, 
+			max(ot.timestamp) maxt 
+	FROM 	option_ticks ot,
+			instrument_master im
+	WHERE 	ot.instrument_token != 260105 AND
+			ot.instrument_token = im.instrument_token
+	GROUP BY ot.instrument_token
+),
+	o_value_start_end
+AS
+(
+	SELECT 	t.tradingsymbol,
+			t.instrument_token,
+			t.mint,
+			itm.last_price imin,
+			otm.last_price omin,
+			otx.last_price omax,
+			itx.last_price imax,			
+			t.maxt
+	FROM 	o_min_max_time t 
+				left outer join option_ticks itm 
+			on itm.timestamp = t.mint and itm.instrument_token = 260105
+				left outer join  option_ticks itx 
+			on itx.timestamp = t.maxt and itx.instrument_token = 260105
+				left outer join option_ticks otm
+			on otm.timestamp = t.mint and otm.instrument_token = t.instrument_token
+				left outer join option_ticks otx
+			on otx.timestamp = t.maxt and otx.instrument_token = t.instrument_token
+)
+SELECT * FROM o_value_start_end order by mint
+
+
+
+=============================================================================================================
+
+
+WITH
+	o_min_max_time
+AS
+(
+	SELECT 	im.tradingsymbol , 
+			ot.instrument_token, 
+			min(ot.timestamp) mint, 
+			max(ot.timestamp) maxt 
+	FROM 	option_ticks ot,
+			instrument_master im
+	WHERE 	ot.instrument_token != 260105 AND
+			ot.instrument_token = im.instrument_token
+	GROUP BY ot.instrument_token
+),
+	o_value_start_end
+AS
+(
+	SELECT 	t.tradingsymbol,
+			t.instrument_token,
+			t.mint,
+			itm.last_price imin,
+			otm.last_price omin,
+			round(CASE	
+				WHEN substr(tradingsymbol,20,2) = "CE" and substr(tradingsymbol,15,5) < itm.last_price THEN otm.last_price - (itm.last_price - substr(tradingsymbol,15,5))
+				WHEN substr(tradingsymbol,20,2) = "CE" and substr(tradingsymbol,15,5) > itm.last_price THEN otm.last_price 
+				WHEN substr(tradingsymbol,20,2) = "PE" and substr(tradingsymbol,15,5) > itm.last_price THEN otm.last_price - (substr(tradingsymbol,15,5) - itm.last_price)
+				WHEN substr(tradingsymbol,20,2) = "PE" and substr(tradingsymbol,15,5) < itm.last_price THEN otm.last_price 
+				ELSE 0
+			END,2) ominp,
+			round(CASE	
+				WHEN substr(tradingsymbol,20,2) = "CE" and substr(tradingsymbol,15,5) < itx.last_price THEN otx.last_price - (itx.last_price - substr(tradingsymbol,15,5))
+				WHEN substr(tradingsymbol,20,2) = "CE" and substr(tradingsymbol,15,5) > itx.last_price THEN otx.last_price 
+				WHEN substr(tradingsymbol,20,2) = "PE" and substr(tradingsymbol,15,5) > itx.last_price THEN otx.last_price - (substr(tradingsymbol,15,5) - itx.last_price)
+				WHEN substr(tradingsymbol,20,2) = "PE" and substr(tradingsymbol,15,5) < itx.last_price THEN otx.last_price 
+				ELSE 0
+			END,2) omaxp,			
+			otx.last_price omax,
+			itx.last_price imax,			
+			t.maxt
+	FROM 	o_min_max_time t 
+				left outer join option_ticks itm 
+			on itm.timestamp = t.mint and itm.instrument_token = 260105
+				left outer join  option_ticks itx 
+			on itx.timestamp = t.maxt and itx.instrument_token = 260105
+				left outer join option_ticks otm
+			on otm.timestamp = t.mint and otm.instrument_token = t.instrument_token
+				left outer join option_ticks otx
+			on otx.timestamp = t.maxt and otx.instrument_token = t.instrument_token
+)
+SELECT * FROM o_value_start_end order by tradingsymbol

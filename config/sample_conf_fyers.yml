@@ -1,0 +1,21 @@
+fyers:
+  username: USERNAME
+  user_pin: 'PIN'
+  totphash: TOTP HASH
+  apikey: APP_IS
+  apisecret: SEC
+  keyfile: config/keyfile
+  loginurl: https://trade.fyers.in/api-login/redirect-uri/index.html
+  response_type: code
+  api_grant: authorization_code
+  api_state: random
+  log_path: logs/fyers
+  auth_file: config/auth_code_h
+
+bank_nifty_db:
+  name: database/bank_nifty.db
+  test: database/bank_nifty_09Feb23.db
+
+nifty_db:
+  name: database/nifty.db
+  test: database/nifty_backtest.db 

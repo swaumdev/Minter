@@ -1,0 +1,16 @@
+zerodha:
+  username: USERNAMe
+  password: PASSWORD
+  totphash: TOPPHASH
+  apikey: KEY
+  apisecret: SEC
+  keyfile: config/keys_s_z
+  loginurl: https://kite.trade/connect/login?api_key=agmkje41h2551l3w&v=3
+
+bank_nifty_db:
+  name: database/bank_nifty.db
+  test: database/bank_nifty_09Feb23.db
+
+nifty_db:
+  name: database/nifty.db
+  test: database/nifty_backtest.db 
